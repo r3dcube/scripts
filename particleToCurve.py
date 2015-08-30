@@ -1,7 +1,5 @@
 import maya.cmds as mc
 
-
-directoryPath = "C:\\Users\Bryan\\Dropbox (Dig-It Games)\\Dig-It\\Temp Files\\2015_02_beaker\\3d\\maya\\particleMess"
 allParticleDictionary = {}
 minFrames = mc.playbackOptions( q=True, min=True)
 maxFrames = mc.playbackOptions( q=True, max=True)
@@ -38,11 +36,9 @@ for curveParticleId in allParticleDictionary.keys():
 
 		for keyFrame in sortedKeyFrameList:
 			pointList.append(allParticleDictionary[curveParticleId][keyFrame])
-		mc.curve(p = pointList)
+		curveName = "partiCurve" + str(curveParticleId)
+		curveObj = mc.curve(name = curveName, p = pointList)
+		locName = "locatorName" + str(curveParticleId)
+		locObj = mc.spaceLocator(name = locName)
+		mc.pathAnimation(locObj, stu=sortedKeyFrameList[0], etu=sortedKeyFrameList[-1] ,c=curveObj)
 		#print pointList
-
-
-#cmds.curve( p=[(0, 0, 0), (3, 5, 6), (5, 6, 7), (9, 9, 9), (12, 10, 2)], k=[0,0,0,1,2,2,2] )
-
-
-#print allParticleDictionary
