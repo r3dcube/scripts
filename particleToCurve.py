@@ -25,7 +25,7 @@ for currentFrame in range(0, int(maxFrames)):
 
 			particleDictionary[currentFrame] = particlesPosition
 			allParticleDictionary[str(particleName[0])] = particleDictionary
-
+			
 for curveParticleId in allParticleDictionary.keys():
 	#print sorted(allParticleDictionary[curveParticleId].keys())
 	#print curveParticleId
@@ -35,10 +35,17 @@ for curveParticleId in allParticleDictionary.keys():
 	if len(sortedKeyFrameList) > 1:
 
 		for keyFrame in sortedKeyFrameList:
-			pointList.append(allParticleDictionary[curveParticleId][keyFrame])
+			pointList.append(allParticleDictionary[curveParticleId][keyFrame])		
 		curveName = "partiCurve" + str(curveParticleId)
 		curveObj = mc.curve(name = curveName, p = pointList)
 		locName = "locatorName" + str(curveParticleId)
 		locObj = mc.spaceLocator(name = locName)
 		mc.pathAnimation(locObj, stu=sortedKeyFrameList[0], etu=sortedKeyFrameList[-1] ,c=curveObj)
+		makeBubble = mc.polyCube(name="bubble",w=.1,h=.1, d=.1, sx=5, sy=5, sz=5)
+		
 		#print pointList
+
+makeBubble = mc.polyCube(name="bubble",w=.1,h=.1, d=.1, sx=5, sy=5, sz=5)
+mc.sculpt(makeBubble, maxDisplacement=.1)
+mc.delete(makeBubble, ch=True)
+mc.nClothCreate()
