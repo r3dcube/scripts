@@ -1,0 +1,943 @@
+//This script allows the user to setup some simple but common and repetitive settings for Maxwell, cameras and render globals.  
+//It also has controls to hide and show elements of Maxwell which are otherwise tedious do to a lack of functionality.
+
+
+global proc bwMaxwellSetup()
+{
+
+if(`window -ex bwMxSetupWindow`)
+    deleteUI bwMxSetupWindow;
+//set maxwell as the current renderer
+
+string $whatRender = `getAttr defaultRenderGlobals.currentRenderer`;
+if ($whatRender != "maxwell")
+setCurrentRenderer maxwell;
+   
+//Create a window 
+window        
+    -t "Maxwell Setup v1.1" 
+    -bgc .45 .45 .45
+    -w 250
+    -rtf 0
+    -s 1
+    bwMxSetupWindow;
+    
+//---STARTS the layers of the Whole window    
+scrollLayout scrollLayout;
+        columnLayout -adjustableColumn true;
+            frameLayout   
+                	-label "---MAXWELL SCENE SETUP OPTIONS---" 
+                	-mw 162
+                	-li 30
+                	-borderStyle "etchedIn"
+	            	-collapsable 0
+		        	-collapse 0	
+		        	 frameOne;
+            setParent ..;
+        setParent ..;
+        
+        
+    frameLayout 
+			-label "Camera & Render Global Options" 
+			-labelAlign "center"
+        	-borderStyle "etchedIn"
+	    	-collapsable 1
+			-collapse 0
+		 	frameTwo;
+			 	
+        //Create a formLayout
+        formLayout mxSetupForm;   
+
+
+    			 	
+//--------------------------------------------------------    			 	
+//---------FIRST-START the form layout content----------
+//--------------------------------------------------------
+    
+            text -l "Setup a new camera" camText;
+            text -l "Setup Render Globals" globalText;
+            button -l "New Camera" -c "mxCamSetup()" setupCam;
+            button -l "Render Globals" -c "mxRenderGlob" setupRG;
+//XXXXXX-----END the form layout content--XXXXXXXXXXXXXXXXXXXXXXXX
+
+
+//---------START form layout positioning----------
+        formLayout -e -w 325 -h 60
+//Second layer for camera text and the camera button
+            -af camText left 3
+            -af camText top 5
+            -ac setupCam left 100 camText
+            -af setupCam top 5
+            -af setupCam right 10
+//Third layer for the render global and the button
+            -af globalText left 3
+            -af globalText top 30
+            -ac setupRG left 100 camText
+            -af setupRG top 30
+            -af setupRG right 10    
+    
+    mxSetupForm;  //This is the END of the mxSetupForm    
+
+
+            setParent ..;
+        setParent ..;  //the set parents move you back up to the top level parent
+        
+        
+        frameLayout 
+		    -label "Hide/Show selected Maxwell Object Attributes" 
+		    -labelAlign "top"
+            -borderStyle "etchedIn"
+	        -collapsable 1
+		    -collapse 0
+		     frameThree;
+
+//Create a formLayout for mxHideSHow. ie(which allows you to turn visibility on|off )
+            formLayout mxHideShowForm;
+    
+
+
+//--------------------------------------------------------    			 	
+//---------SECOND-START the form layout content----------
+//--------------------------------------------------------  
+
+    	text -l "Hidden From Camera" hideText;
+    	text -l "Hidden To Secondary Rays" secRaysText;
+    	text -l "Hidden To Global Illum" GIText;
+    	text -l "Unaffected by Z clip" zClipText;
+    	text -l "Specify Object ID Color" specObjIdText;
+    	text -l "Change Color" chanColorText;
+//Hidden from camera hide and show buttons    
+    	button -l "Hide" -c "bwMxHide()" hideCamButton;
+    	button -l "Show" -c "bwMxShow()" showCamButton;
+//Hidden from secondary rays hide and show buttons    
+    	button -l "Hide" -c "bwsecRaysHide()" hidesecRaysButton;
+   	 	button -l "Show" -c "bwsecRaysShow()" showsecRaysButton;
+//Hidden from GI hide and show buttons    
+    	button -l "Hide" -c "bwGIHide()" hideGIButton;
+    	button -l "Show" -c "bwGIShow()" showGIButton;
+//Hidden from zClip hide and show buttons    
+    	button -l "Hide" -c "bwzClipHide()" hidezClipButton;
+    	button -l "Show" -c "bwzClipShow()" showzClipButton;
+//Specify the objec ID color   
+    	button -l "On  " -c "bwSpecObjIDColOn()" specIDOnButton;
+    	button -l "Off" -c "bwSpecObjIDColOff()" specIDOffButton;
+//checkboxes
+		//columnLayout;
+        checkBox -l  "White" -cc "bwOChanClrWhite()" objIdWhChkBox;
+        checkBox -l  "Black" -cc "bwOChanClrBlack()" objIdBlChkBox;
+        checkBox -l  "Red" -cc "bwOChanClrRed()" objIdRedChkBox;
+        checkBox -l  "Green" -cc "bwOChanClrGreen()" objIdGreenChkBox;
+        checkBox -l  "Blue" -cc "bwOChanClrBlue()" objIdBlueChkBox;
+        checkBox -l  "Yellow" -cc "bwOChanClrYellow()" objIdYellowChkBox; 
+//---------END the form layout content------------
+//---------START form layout positioning----------
+		formLayout -e -w 325 -h 200
+//Second layer for camera text and the camera button
+    			-af hideText left 3
+    			-af hideText top 10
+    
+    			-ac hideCamButton left 100 hideText
+    			-af hideCamButton top 5
+    //-af hideCamButton right 75
+    
+    			-ac showCamButton left 15 hideCamButton
+    			-af showCamButton top 5
+    			-af showCamButton right 5
+//Third layer-- Secondary ray text and button placement
+    			-af secRaysText left 3
+    			-af secRaysText top 35
+    			-ac hidesecRaysButton left 100 hideText
+    			-af hidesecRaysButton top 35
+    			
+    
+    			-ac showsecRaysButton left 15 hidesecRaysButton
+    			-af showsecRaysButton top 35
+    			-af showsecRaysButton right 5
+//Forth layer--GI text and button placement
+    			-af GIText left 3
+    			-af GIText top 65
+    			-ac hideGIButton left 96 GIText
+    			-af hideGIButton top 65
+ 				
+    
+    			-ac showGIButton left 15 hideGIButton
+    			-af showGIButton top 65
+    			-af showGIButton right 5
+//Forth layer--zClip text and button placement
+    			-af zClipText left 3
+    			-af zClipText top 95
+    			-ac hidezClipButton left 104 zClipText
+    			-af hidezClipButton top 95
+    			
+    
+    			-ac showzClipButton left 15 hidezClipButton
+    			-af showzClipButton top 95
+    			-af showzClipButton right 5 
+    			
+//Forth layer--zClip text and button placement
+    			-af specObjIdText left 3
+    			-af specObjIdText top 125
+    			-ac specIDOnButton left 88 specObjIdText
+    			-af specIDOnButton top 125
+    			
+    
+    			-ac specIDOffButton left 15 specIDOnButton
+    			-af specIDOffButton top 125
+    			-af specIDOffButton right 5
+//Checkboxes
+
+				-af chanColorText left 3
+    			-af chanColorText top 155
+				//chanColorText
+				-af objIdWhChkBox left 85
+				-af objIdWhChkBox top 155
+				
+				-af objIdBlChkBox left 150
+				-af objIdBlChkBox top 155
+				   			
+				-af objIdRedChkBox left 210
+				-af objIdRedChkBox top 155
+				
+				-af objIdGreenChkBox left 85
+				-af objIdGreenChkBox top 175
+				
+				-af objIdBlueChkBox left 150
+				-af objIdBlueChkBox top 175
+				
+				-af objIdYellowChkBox left 210
+				-af objIdYellowChkBox top 175
+    			
+    			
+    mxHideShowForm;//This is the END of the mxSetupForm   
+
+					
+			setParent ..;
+        setParent ..;  //the set parents move you back up to the top level parent    
+
+
+//------------------------------------------------------------------------------    			 	
+//---------Third-START the form layout content for the Refresh Maxwell Swatches
+//------------------------------------------------------------------------------         
+		frameLayout 
+		    -label "Refresh Maxwell Hypershade Swatches" 
+		    -labelAlign "top"
+            -borderStyle "etchedIn"
+	        -collapsable 1
+		    -collapse 0
+		     frameFour;        
+        
+        //Create a formLayout
+        	formLayout mxRefreshSwatch;   
+
+
+    			 	
+//--------------------------------------------------------    			 	
+//---------FIRST-START the form layout content----------
+//--------------------------------------------------------
+    
+            	text -l "Refresh All Maxwell Swatches" swatchRefText;
+            	button -l "Refresh" -c "bwMxSwatchRefresh()" swatchRefButton;
+            
+//XXXXXX-----END the form layout content--XXXXXXXXXXXXXXXXXXXXXXXX
+
+
+//---------START form layout positioning----------
+        		formLayout -e -w 325 -h 40 
+//Second layer for camera text and the camera button
+            		-af swatchRefText left 3
+            		-af swatchRefText top 10
+           			-ac swatchRefButton left 96 swatchRefText
+            		-af swatchRefButton top 8            		
+            		-af swatchRefButton right 5
+            		-af swatchRefButton bottom 5
+            		
+   
+    
+mxRefreshSwatch;  //This is the END of the mxSetupForm    
+
+
+            	setParent ..;
+        	setParent ..;
+        	
+
+
+
+//------------------------------------------------------------------------------------    			 	
+//---------Forth-START the form layout content to change shaders into Matte or Shadow
+//------------------------------------------------------------------------------------  
+
+         frameLayout  
+		    		-label "Make selected OBJECTS Matte or Shadow" 
+		    		-labelAlign "top"
+            		-borderStyle "etchedIn"
+	        		-collapsable 1
+		    		-collapse 0
+		     		frameFive;
+
+//Create a formLayout for createing a matte and shadow attribute to your shader
+            formLayout mxBQMatteShad;
+    
+
+
+//--------------------------------------------------------    			 	
+//---------SECOND-START the form layout content----------
+//--------------------------------------------------------  
+
+    					text -l "Make selected objects Matte" matteText;
+    					text -l "Make selected objects Shadow" shadowText;
+    					text -l "**If your creating shadow don't forget to turn  on the channel" reminderText;
+    					text -l "     in the render globals**" reminderMoreText;
+//Make or remove the Matte attribute you've added to the selected shader  
+    					button -l "Create" -c "bwMxMatte()" makeMatButton;
+    					button -l "Remove" -c "bwMxNoMatte()" removeMatButton;
+//Hidden from secondary rays hide and show buttons    
+    					button -l "Create" -c "bwMxShadow()" makeShadButton;
+   						button -l "Remove" -c "bwMxNoShadow()" removeShadButton;
+
+//---------------EDIT MODE---------------------------------------------------
+							formLayout -e -w 325 -h 100 
+//setting up the text and button for the make matte
+    							-af matteText left 3
+    							-af matteText top 10
+    
+    							-ac makeMatButton left 25 matteText
+    							-af makeMatButton top 5
+//--------next button    
+    							-ac removeMatButton left 5 makeMatButton
+    							-af removeMatButton top 5
+    							-af removeMatButton right 5
+//Third layer-- creates the shadow text, make and remove buttons
+    							-af shadowText left 3
+    							-af shadowText top 35
+    							-af reminderText top 60
+    							-af reminderMoreText top 80
+    							
+    							
+    							-ac makeShadButton left 15 shadowText
+    							-af makeShadButton top 35    			
+    
+    							-ac removeShadButton left 5 makeShadButton
+    							-af removeShadButton top 35
+    							-af removeShadButton right 5 
+
+mxBQMatteShad;//This is the END of the mxSetupForm   
+
+
+				setParent ..;
+			setParent ..;  //the set parents move you back up to the top level parent 
+			  	
+
+    
+    
+      
+showWindow bwMxSetupWindow;
+
+}
+
+
+
+
+//-------------------------------------------------------------------------------------------------------------
+//-----START this creates a camera and and distance locators, it also connects the attribute up to the camera.
+//-------------------------------------------------------------------------------------------------------------
+
+
+global proc mxCamSetup()
+{        
+if (objExists("shotCam"))
+    print "Camera already exists....  stop trying to make another :)";
+else
+    {
+        
+    
+//create shotCam camera
+
+camera -n "shotCam" 
+	-centerOfInterest 5 
+	-focalLength 35 
+	-lensSqueezeRatio 1 
+	-cameraScale 1 
+	-horizontalFilmAperture 1.41732 
+	-horizontalFilmOffset 0 
+	-verticalFilmAperture 0.94488 
+	-verticalFilmOffset 0 
+	-filmFit Fill 
+	-overscan 1 
+	-motionBlur 0 
+	-shutterAngle 180 
+	-nearClipPlane 0.1 
+	-farClipPlane 10000 
+	-orthographic 0 
+	-orthographicWidth 30 
+	-panZoomEnabled 0 
+	-horizontalPan 0 
+	-verticalPan 0 
+	-zoom 1; 
+objectMoveCommand; cameraMakeNode 1 "";
+
+//create distanceMeasure
+
+distanceDimension -sp -0 0 0 -ep 0 0 -25 ;
+rename "shotCam1" "shotCam";
+rename "locator2" "distanceLocator";
+rename "distanceDimension1" "distanceMeasure";
+parent locator1 shotCam;
+rename "locator1" "shotCamLocator";        
+        }
+        
+    }
+//-------------------------------------------------------------------------------------------------------------
+//-----END this is the end of the camera setup
+//-------------------------------------------------------------------------------------------------------------
+    
+    
+    
+//-------------------------------------------------------------------------------------------------------------
+//-----START this sets up the render globals for Maxwell
+//-------------------------------------------------------------------------------------------------------------
+    
+global proc mxRenderGlob()
+{
+//Setup Maya Prefix
+	insertKeywordMenuCallback ("<Scene>" + "/" + "<RenderLayer>" + "/" + "<Scene>" + "_" + "<RenderLayer>" );
+
+//Setup image and animation format
+	setAttr "defaultRenderGlobals.imageFormat" 31;
+
+// setup frame/animation
+	setAttr defaultRenderGlobals.outFormatControl 0;
+	setAttr defaultRenderGlobals.animation 1;
+	setAttr defaultRenderGlobals.putFrameBeforeExt 1;
+	setAttr defaultRenderGlobals.extensionPadding 4;
+	setAttr defaultRenderGlobals.periodInExt 1;
+
+//turn default light off
+	setAttr "defaultRenderGlobals.enableDefaultLight" 0;
+        
+       
+if (objExists("shotCam")== false)
+	print "You need to create a camera and hit the, 'Create Render Globals' button again";
+else
+{
+
+//choose renderCam to be the renderable camera
+	setAttr "frontShape.renderable" 0;
+	setAttr "perspShape.renderable" 0;
+	setAttr "sideShape.renderable" 0;
+	setAttr "topShape.renderable" 0;
+	setAttr "shotCamShape.renderable" 1;
+	setAttr "defaultResolution.width" 1024;
+	setAttr "defaultResolution.height" 576;
+	setAttr "defaultResolution.deviceAspectRatio" 1.778;
+	setAttr "defaultResolution.pixelAspect" 1;
+
+//maxwell camera properties
+	//~ select -r shotCam ;
+	source "C:/Program Files/Autodesk/Maya2012/scripts/others/maxwellCustomAttrs.mel";
+	source "C:/Program Files/Autodesk/Maya2012/scripts/others/maxwellBuildCameraControls.mel";
+	$nodeName = "shotCamShape.";
+	maxwellCustomEnumNew maxwellUseEVCheck ($nodeName + "mxExpMode");
+	maxwellCustomFloatNew ($nodeName + "mxShutterSpeed");
+	maxwellCustomFloatNew ($nodeName + "mxFstop");
+	maxwellCustomIntNew "" ($nodeName + "mxEV");
+	maxwellCustomIntNew "" ($nodeName + "mxIso");
+	maxwellCustomEnumChanged "shotCamShape.mxExpMode";
+	setAttr "shotCamShape.mxExpMode" 2;
+	
+	bwMaxwellCustomScalarChanged "bool" "shotCamShape.mxUseFocusDistance";
+	setAttr "shotCamShape.mxUseFocusDistance" 1;
+	bwMaxwellCustomScalarChanged "double" "shotCamShape.mxFocusDistance";
+	setAttr "shotCamShape.mxFocusDistance" 60;
+	
+	connectAttr -f distanceMeasureShape.distance shotCamShape.mxFocusDistance;
+}
+
+//setup Maxwell's render settings
+if(objExists("maxwellRenderOptions") == false)
+   createNode -n "maxwellRenderOptions" "maxwellRenderOptions";
+
+
+	setAttr "maxwellRenderOptions.outputImgDepth" 2;
+	setAttr "maxwellRenderOptions.alphaChannel" 1;
+	setAttr "maxwellRenderOptions.embedAlpha" 1;
+
+	}
+//-------------------------------------------------------------------------------------------------------------
+//-----END this is the end of the render globals setup
+//-------------------------------------------------------------------------------------------------------------	
+
+//-------------------------------------------------------------------------------------------------------------
+//-----START this hides objects from maxwell camera on a layerOverRide
+//-------------------------------------------------------------------------------------------------------------
+
+global proc bwMxHide()
+{
+string $sel[];
+string $nodeType;
+$sel= `ls -sl -dag -lf`;
+for($i=0;$i<size($sel);$i++)
+{  
+    
+       maxwellCustomScalarChanged "bool" ($sel[$i]+".mxHideToCamera"); 
+       editRenderLayerAdjustment ($sel[$i]+".mxHideToCamera");        
+       setAttr  ($sel[$i]+".mxHideToCamera") 1;     
+}
+}
+//-------------------------------------------------------------------------------------------------------------
+//-----END this is the end of hide objects
+//-------------------------------------------------------------------------------------------------------------	
+
+//-------------------------------------------------------------------------------------------------------------
+//-----START this shows objects from maxwell camera on a layerOverRide
+//-------------------------------------------------------------------------------------------------------------
+global proc bwMxShow()
+{
+string $sels[];
+string $nodeType;
+$sels= `ls -sl -dag -lf`;
+for($i=0;$i<size($sels);$i++)
+{  
+    
+       maxwellCustomScalarChanged "bool" ($sels[$i]+".mxHideToCamera");
+       editRenderLayerAdjustment ($sels[$i]+".mxHideToCamera");            
+       setAttr  ($sels[$i]+".mxHideToCamera") 0;     
+}
+}
+//-------------------------------------------------------------------------------------------------------------
+//-----END this is the end of the render globals setup
+//-------------------------------------------------------------------------------------------------------------	
+
+
+//-------------------------------------------------------------------------------------------------------------
+//-----START this hides the objects from secondary rays
+//-------------------------------------------------------------------------------------------------------------
+global proc bwsecRaysHide()
+{
+string $sel[];
+string $nodeType;
+$sel= `ls -sl -dag -lf`;
+for($i=0;$i<size($sel);$i++)
+{  
+       
+         
+       maxwellCustomScalarChanged "bool" ($sel[$i]+".mxHideToSecRays");
+       editRenderLayerAdjustment ($sel[$i]+".mxHideToSecRays");       
+       setAttr  ($sel[$i]+".mxHideToSecRays") 1;     
+}
+}
+//-------------------------------------------------------------------------------------------------------------
+//-----END this is the end of the secRaysHide proc
+//-------------------------------------------------------------------------------------------------------------	
+
+//-------------------------------------------------------------------------------------------------------------
+//-----START this shows the objects from secondary rays
+//-------------------------------------------------------------------------------------------------------------
+global proc bwsecRaysShow()
+{
+string $sel[];
+string $nodeType;
+$sel= `ls -sl -dag -lf`;
+for($i=0;$i<size($sel);$i++)
+{  
+       
+         
+       maxwellCustomScalarChanged "bool" ($sel[$i]+".mxHideToSecRays");
+       editRenderLayerAdjustment ($sel[$i]+".mxHideToSecRays");       
+       setAttr  ($sel[$i]+".mxHideToSecRays") 0;     
+}
+}
+//-------------------------------------------------------------------------------------------------------------
+//-----END this is the end of the secRaysShow proc
+//-------------------------------------------------------------------------------------------------------------	
+
+
+//-------------------------------------------------------------------------------------------------------------
+//-----START this hides the selected objects from Global Illumination
+//-------------------------------------------------------------------------------------------------------------
+global proc bwGIHide()
+{
+string $sel[];
+string $nodeType;
+$sel= `ls -sl -dag -lf`;
+for($i=0;$i<size($sel);$i++)
+{  
+       
+         
+       maxwellCustomScalarChanged "bool" ($sel[$i]+".mxHideToGI");
+       editRenderLayerAdjustment ($sel[$i]+".mxHideToGI");       
+       setAttr  ($sel[$i]+".mxHideToGI") 1;     
+}
+}
+//-------------------------------------------------------------------------------------------------------------
+//-----END this is the end of the Global Illumination hide script
+//-------------------------------------------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------------------------------------------
+//-----START this hides the selected objects from Global Illumination
+//-------------------------------------------------------------------------------------------------------------
+global proc bwGIShow()
+{
+string $sel[];
+string $nodeType;
+$sel= `ls -sl -dag -lf`;
+for($i=0;$i<size($sel);$i++)
+{  
+       
+         
+       maxwellCustomScalarChanged "bool" ($sel[$i]+".mxHideToGI");
+       editRenderLayerAdjustment ($sel[$i]+".mxHideToGI");       
+       setAttr  ($sel[$i]+".mxHideToGI") 0;     
+}
+}
+//-------------------------------------------------------------------------------------------------------------
+//-----END this is the end of the Global Illumination hide script
+//-------------------------------------------------------------------------------------------------------------
+
+
+//-------------------------------------------------------------------------------------------------------------
+//-----START this makes the selected objects unaffected from the zclip
+//-------------------------------------------------------------------------------------------------------------
+global proc bwzClipHide()
+{
+string $sel[];
+string $nodeType;
+$sel= `ls -sl -dag -lf`;
+for($i=0;$i<size($sel);$i++)
+{  
+       
+         
+       maxwellCustomScalarChanged "bool" ($sel[$i]+".mxHideToZClip");
+       editRenderLayerAdjustment ($sel[$i]+".mxHideToZClip");       
+       setAttr  ($sel[$i]+".mxHideToZClip") 1;     
+}
+}
+
+//-------------------------------------------------------------------------------------------------------------
+//-----END this is the end of the zClip unaffected script
+//-------------------------------------------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------------------------------------------
+//-----START this makes the selected objects unaffected from the zclip
+//-------------------------------------------------------------------------------------------------------------
+global proc bwzClipShow()
+{
+string $sel[];
+string $nodeType;
+$sel= `ls -sl -dag -lf`;
+for($i=0;$i<size($sel);$i++)
+{  
+       
+         
+       maxwellCustomScalarChanged "bool" ($sel[$i]+".mxHideToZClip");
+       editRenderLayerAdjustment ($sel[$i]+".mxHideToZClip");       
+       setAttr  ($sel[$i]+".mxHideToZClip") 0;     
+}
+}
+
+//-------------------------------------------------------------------------------------------------------------
+//-----END this is the end of the zClip unaffected script
+//-------------------------------------------------------------------------------------------------------------
+
+
+//-------------------------------------------------------------------------------------------------------------
+//-----START this turns ON the specify ID color
+//-------------------------------------------------------------------------------------------------------------
+
+
+
+global proc bwSpecObjIDColOn()
+{
+string $sel[];
+string $nodeType;
+$sel= `ls -sl -dag -lf`;
+for($i=0;$i<size($sel);$i++)
+{  
+       
+         
+       maxwellCustomScalarChanged "bool" ($sel[$i]+".mxSpecifyObjIdColor");
+       editRenderLayerAdjustment ($sel[$i]+".mxSpecifyObjIdColor");       
+       setAttr  ($sel[$i]+".mxSpecifyObjIdColor") 1;     
+}
+}
+
+//-------------------------------------------------------------------------------------------------------------
+//-----END 
+//-------------------------------------------------------------------------------------------------------------
+
+
+
+
+//-------------------------------------------------------------------------------------------------------------
+//-----START this turns OFF the specify ID color
+//-------------------------------------------------------------------------------------------------------------
+
+
+
+global proc bwSpecObjIDColOff()
+{
+string $sel[];
+string $nodeType;
+$sel= `ls -sl -dag -lf`;
+for($i=0;$i<size($sel);$i++)
+{  
+       
+         
+       maxwellCustomScalarChanged "bool" ($sel[$i]+".mxSpecifyObjIdColor");
+       editRenderLayerAdjustment ($sel[$i]+".mxSpecifyObjIdColor");       
+       setAttr  ($sel[$i]+".mxSpecifyObjIdColor") 0;     
+}
+}
+
+//-------------------------------------------------------------------------------------------------------------
+//-----END 
+//-------------------------------------------------------------------------------------------------------------
+
+
+//-------------------------------------------------------------------------------------------------------------
+//-----START changes the object ID color to White
+//-------------------------------------------------------------------------------------------------------------
+
+
+global proc bwOChanClrWhite()
+{
+string $sel[];
+string $nodeType;
+$sel= `ls -sl -dag -lf`;
+for($i=0;$i<size($sel);$i++)
+{  
+       
+         
+       maxwellCustomColorChanged ($sel[$i]+".mxObjIdColor");
+       editRenderLayerAdjustment ($sel[$i]+".mxObjIdColor");       
+       setAttr  ($sel[$i]+".mxObjIdColor") 1 1 1;     
+}
+}
+
+//-------------------------------------------------------------------------------------------------------------
+//-----START changes the object ID color to Black
+//-------------------------------------------------------------------------------------------------------------
+
+global proc bwOChanClrBlack()
+{
+string $sel[];
+string $nodeType;
+$sel= `ls -sl -dag -lf`;
+for($i=0;$i<size($sel);$i++)
+{  
+       
+         
+       maxwellCustomColorChanged ($sel[$i]+".mxObjIdColor");
+       editRenderLayerAdjustment ($sel[$i]+".mxObjIdColor");       
+       setAttr  ($sel[$i]+".mxObjIdColor") 0 0 0;     
+}
+}
+
+//-------------------------------------------------------------------------------------------------------------
+//-----START changes the object ID color to Green
+//-------------------------------------------------------------------------------------------------------------
+
+global proc bwOChanClrGreen()
+{
+string $sel[];
+string $nodeType;
+$sel= `ls -sl -dag -lf`;
+for($i=0;$i<size($sel);$i++)
+{  
+       
+         
+       maxwellCustomColorChanged ($sel[$i]+".mxObjIdColor");
+       editRenderLayerAdjustment ($sel[$i]+".mxObjIdColor");       
+       setAttr  ($sel[$i]+".mxObjIdColor") 0 1 0;     
+}
+}
+
+
+//-------------------------------------------------------------------------------------------------------------
+//-----START changes the object ID color to Red
+//-------------------------------------------------------------------------------------------------------------
+
+global proc bwOChanClrRed()
+{
+string $sel[];
+string $nodeType;
+$sel= `ls -sl -dag -lf`;
+for($i=0;$i<size($sel);$i++)
+{  
+       
+         
+       maxwellCustomColorChanged ($sel[$i]+".mxObjIdColor");
+       editRenderLayerAdjustment ($sel[$i]+".mxObjIdColor");       
+       setAttr  ($sel[$i]+".mxObjIdColor") 1 0 0;     
+}
+}
+
+//-------------------------------------------------------------------------------------------------------------
+//-----START changes the object ID color to Blue
+//-------------------------------------------------------------------------------------------------------------
+
+global proc bwOChanClrBlue()
+{
+string $sel[];
+string $nodeType;
+$sel= `ls -sl -dag -lf`;
+for($i=0;$i<size($sel);$i++)
+{  
+       
+         
+       maxwellCustomColorChanged ($sel[$i]+".mxObjIdColor");
+       editRenderLayerAdjustment ($sel[$i]+".mxObjIdColor");       
+       setAttr  ($sel[$i]+".mxObjIdColor") 0 0 1;     
+}
+}
+
+
+//-------------------------------------------------------------------------------------------------------------
+//-----START changes the object ID color to Yellow
+//-------------------------------------------------------------------------------------------------------------
+
+global proc bwOChanClrYellow()
+{
+string $sel[];
+string $nodeType;
+$sel= `ls -sl -dag -lf`;
+for($i=0;$i<size($sel);$i++)
+{  
+       
+         
+       maxwellCustomColorChanged ($sel[$i]+".mxObjIdColor");
+       editRenderLayerAdjustment ($sel[$i]+".mxObjIdColor");       
+       setAttr  ($sel[$i]+".mxObjIdColor") 1 1 0;     
+}
+}
+
+
+
+
+
+
+//-------------------------------------------------------------------------------------------------------------
+//-----START this refreshes all the Maxwell swatches in the scene
+//-------------------------------------------------------------------------------------------------------------
+//select all the maxwell materials in the scene and refresh the swatches
+global proc bwMxSwatchRefresh()
+{
+string $materialSel[];
+$materialSel = `ls -typ "maxwellLayeredMaterial"`;
+for ($item in $materialSel)
+{
+	
+	setAttr ($item + ".updateSwatch") true;
+	//print ($item + .updateSwatch) true "\n");   
+} 
+}
+//-------------------------------------------------------------------------------------------------------------
+//-----END this is the end of the refresh swatch script
+//-------------------------------------------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------------------------------------------
+//-----START this ticks on the matte attribute on the shader
+//-------------------------------------------------------------------------------------------------------------
+global proc bwMxMatte()
+{
+string $shape[] = `ls -dag -shapes -sl`;
+
+for ($each in $shape)
+{
+string $shadingEngine[] = `listConnections -source true -type shadingEngine $each`;
+string $shader[] =`listConnections ($shadingEngine[0] +".surfaceShader")`;
+setAttr ($shader[0] +".matte") 1;
+}
+}
+
+//-------------------------------------------------------------------------------------------------------------
+//-----END this is the end of the matte
+//------------------------------------------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------------------------------------------
+//-----START this ticks on the matte attribute on the shader
+//-------------------------------------------------------------------------------------------------------------
+global proc bwMxNoMatte()
+{
+string $shape[] = `ls -dag -shapes -sl`;
+
+for ($each in $shape)
+{
+string $shadingEngine[] = `listConnections -source true -type shadingEngine $each`;
+string $shader[] =`listConnections ($shadingEngine[0] +".surfaceShader")`;
+setAttr ($shader[0] +".matte") 0;
+}
+}
+//-------------------------------------------------------------------------------------------------------------
+//-----END this is the end of the matte
+//------------------------------------------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------------------------------------------
+//-----START this ticks on the shadow attribute on the shader
+//-------------------------------------------------------------------------------------------------------------
+global proc bwMxShadow()
+{
+
+string $shape[] = `ls -dag -shapes -sl`;
+
+for ($each in $shape)
+{
+string $shadingEngine[] = `listConnections -source true -type shadingEngine $each`;
+string $shader[] =`listConnections ($shadingEngine[0] +".surfaceShader")`;
+setAttr ($shader[0] +".shadows") 1;
+}
+}
+//-------------------------------------------------------------------------------------------------------------
+//-----END this is the end of the shadow
+//------------------------------------------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------------------------------------------
+//-----START this ticks on the shadow attribute on the shader
+//-------------------------------------------------------------------------------------------------------------
+global proc bwMxNoShadow()
+{
+string $shape[] = `ls -dag -shapes -sl`;
+
+for ($each in $shape)
+{
+string $shadingEngine[] = `listConnections -source true -type shadingEngine $each`;
+string $shader[] =`listConnections ($shadingEngine[0] +".surfaceShader")`;
+setAttr ($shader[0] +".shadows") 0;
+}
+}
+//-------------------------------------------------------------------------------------------------------------
+//-----END this is the end of the shadow
+//------------------------------------------------------------------------------------------------------------
+
+global proc bwMaxwellCustomScalarChanged(string $type, string $attr)
+{
+	string $buffer[];
+	tokenize $attr "." $buffer;
+	string $nodeName = $buffer[0];
+	string $attrName = $buffer[size($buffer)-1];
+	string $ctrlName = `nodeType $nodeName` + $attrName;
+	
+	if(!`attributeQuery -node $nodeName -exists $attrName`)
+	{
+		$defVal = maxwellGetDefaultCustomAttr($attrName);
+		if($type == "bool")
+		{
+			addAttr -longName $attrName -attributeType $type -defaultValue ((int)$defVal) $nodeName;
+			
+		}
+		else if($type == "long")
+		{
+			addAttr -longName $attrName -attributeType $type -defaultValue ((int)$defVal) $nodeName;
+			
+		}
+		else if($type == "double")
+		{
+			addAttr -longName $attrName -attributeType $type -defaultValue ((float)$defVal) $nodeName;
+			
+		}
+		else
+			error ("Unknown attribute type '" + $type + "' in maxwellCustomScalarChanged()");
+	}
+
+}
+
+bwMaxwellSetup;
