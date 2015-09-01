@@ -9,7 +9,7 @@ window = mc.window("makeMatteWindowUI",  mxb=False, s=0, title="Mattes & Countou
 
 
 mc.rowColumnLayout(nc=1, cw=[1,275], cal=[1,'left'])
-mc.rowColumnLayout(nr=3, rh=[(1, 50), (2, 30), (3, 20)])
+mc.rowColumnLayout(nr=3, rh=[(1, 50), (2, 30), (3, 20)]
 createMatteBtn = mc.button(label="Create Mattes", c="makeMattes()")
 lineThickBtn = mc.button(label="Enable Contour/Change Line Thickness", c="lineThickness()", w=30)
 queryLineValue = mc.floatSliderGrp(field=True, cat=(1,'left',1), min=0.0, max=5.0, value=1)	
