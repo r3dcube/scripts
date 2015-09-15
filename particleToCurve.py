@@ -8,7 +8,7 @@
 #
 #Tested on Maya 2016 for Windows
 #Use at your own risk
-###########################################################################
+###############################################2############################
 import maya.cmds as mc
 
 allParticleDictionary = {}
