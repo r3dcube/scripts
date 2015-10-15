@@ -1,7 +1,14 @@
 import maya.cmds as mc
 import random
 import math
+
 allParticleDictionary = {}
+
+emptyFolder = mc.group(em=True, n="extruPath")
+emptyCirFolder = mc.group(em=True, n="circleCreation")	
+empty_ACirFolder = mc.group(em=True, n="circleGeo")
+empty_curveFolder = mc.group(em=True, n="curveExtrusions")
+
 minFrames = mc.playbackOptions( q=True, min=True)
 maxFrames = mc.playbackOptions( q=True, max=True)
 
@@ -27,11 +34,6 @@ for currentFrame in range(0, int(maxFrames)):
 			particleDictionary[currentFrame] = particlesPosition 
 			allParticleDictionary[str(particleName[0])] = particleDictionary
 
-#House cleaning
-emptyFolder = mc.group(em=True, n="extruPath")
-emptyCirFolder = mc.group(em=True, n="circleCreation")	
-empty_ACirFolder = mc.group(em=True, n="circleGeo")
-empty_curveFolder = mc.group(em=True, n="curveExtrusions")
 		
 for curveParticleId in allParticleDictionary.keys():
 	#print sorted(allParticleDictionary[curveParticleId].keys())
@@ -45,20 +47,24 @@ for curveParticleId in allParticleDictionary.keys():
 			pointList.append(allParticleDictionary[curveParticleId][keyFrame])
 					
 		curveName = "partiCurve" + str(curveParticleId)
-		curveObj = mc.curve(name = curveName, p = pointList)
+		curveObj = mc.curve(name=curveName, p=pointList)
 			
 		
 		#For every locator we create, make a bubble and attach that to the locator in worldspace and parent in underneath
         getCurvLen = mc.arclen(curveObj)
-        makeCvrLenInt = math.ceil(getCurvLen*.25) 
+        makeCvrLenInt = math.ceil(getCurvLen*.5)#reduces the amount of spans the curve has, this is useful on very long extrusions 
         
         
         makeCircle = mc.circle(n="newCircle",d=1, s=12)
-        aCircle = mc.planarSrf(makeCircle[0], n="extruTube", d=3, po=1)
-
+        aCircle = mc.planarSrf(makeCircle[0], n="extruTube", ch=1, d=1, ko=0, rn=0, po=1, nds=3)
+        getTesInfo = mc.listConnections(aCircle[1], t="nurbsTessellate")
+        mc.setAttr(getTesInfo[0] + ".polygonCount", 1)
+        mc.setAttr(getTesInfo[0] + ".polygonType", 1)
+        mc.setAttr(getTesInfo[0] + ".format", 0)
+        
         
         getCurveCVPos = mc.xform(curveObj + ".cv[0]", ws=True, q=True, translation=True)
-        mc.xform(makeCircle[0], ws=True, t=(getCurveCVPos[0], getCurveCVPos[1], getCurveCVPos[2]),ro=(90, 0, 0))
+        mc.xform(makeCircle[0], ws=True, t=(getCurveCVPos[0], getCurveCVPos[1], getCurveCVPos[2]),ro=(90, 0, 0))#use "ro" to orient the circle to the curve if your extrusion is black
         
         tubes = mc.polyExtrudeFacet(aCircle[0] + ".f[0]", inc=curveObj, d=makeCvrLenInt)
         subCurveCreate = mc.createNode("subCurve", n="subCurve_" + curveObj)
@@ -86,6 +92,3 @@ for curveParticleId in allParticleDictionary.keys():
         mc.parent(curveObj, empty_curveFolder)
         
 mc.parent(empty_curveFolder,emptyCirFolder,empty_ACirFolder, emptyFolder)
-        
-        
-        
