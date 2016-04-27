@@ -1,19 +1,25 @@
+'''
 ###########################################################################
-#name:				bwParticleToBubblePop -- Oct 2015
-#Created by: Bryan Woodard & Chris Jones(github.com/csjones)
-#This script will build a curve and attach a locator to the
-#curve using the pathAnimation command (motion path). It will then build
-#a simple sphere and give it specific nCloth properties
-#
-#Use: make sure you have an nParticle named nParticle1 in the scene.
-#
-#Future updates - update so selected nParticle systems can work. Also update
-#attributes for nCloth.
-#
-#Tested on Maya 2016 for Windows
-#Use at your own risk
-############################################################################
+name:				bwParticleToBubblePop -- Oct 2015
+Created by: Bryan Woodard & Chris Jones(github.com/csjones
+This script will build a curve and attach a locator to the
+curve using the pathAnimation command (motion path). It will then build
+a simple sphere and give it specific nCloth properties
 
+Use: make sure you have an nParticle named nParticle1 in the scene.
+
+Future updates - update so selected nParticle systems can work. Also update
+attributes for nCloth.
+version history
+v0.1 - scipt has the ability to make bubbles
+v0.2 - User must select any nParticle
+	 - Some added error handling
+	 - Can now pop bubbles
+
+Tested on Maya 2016 for Windows
+Use at your own risk
+############################################################################
+'''
 import maya.cmds as mc
 import random
 import maya.mel as mel
@@ -81,13 +87,13 @@ for shapeSel in getSelPartiShape:
 		        getPos = mc.xform(locObj, ws=True, q=True, translation=True)
 		        mc.xform(makeBubble[0], t=(getPos[0], getPos[1], getPos[2]))
 		        mc.parent(makeBubble[0], locObj)
-		        randBubbleSize = random.uniform(.4,.6)#This is what will give our bubbles the random size
+		        randBubbleSize = random.uniform(.2, .8)#This is what will give our bubbles the random size
 		        mc.scale(randBubbleSize, randBubbleSize, randBubbleSize, makeBubble[0])
 		
 		        #Create nCloth for each bubble and set the collide strength to turn on when the bubble moves, never before.
 		        mc.select(makeBubble[0])
 		        mc.nClothCreate()
-		        bubbleNClothName = mc.rename("nCloth1", ("bubbleCloth" + str(inc)))
+		        bubbleNClothName = mc.rename("nCloth1", ("nClothBub" + str(inc)))
 		        #mc.setAttr(locObj + ".collideStrength", 0)
 		        mc.setKeyframe(bubbleNClothName, attribute='collideStrength', t=[sortedKeyFrameList[0], sortedKeyFrameList[-1]])
 		        mc.setAttr(bubbleNClothName + ".collideStrength", 0)
@@ -115,7 +121,7 @@ for shapeSel in getSelPartiShape:
 		        setOn = mc.setKeyframe( locObj[0], attribute='visibility', t=[sortedKeyFrameList[0], sortedKeyFrameList[-1]])
 		        mc.setAttr(locObj[0] + ".visibility", 0)
 		        setOff = mc.setKeyframe( locObj[0], attribute='visibility', t=[sortedKeyFrameList[0]-1, sortedKeyFrameList[-1]+1])
-		        '''
+		        
 		        ######################################################################
 		        #pop the bubble - we know there are 152 vers in the bubble. Pick a random number in that and go up and down from that number by 35 to get random selections
 		        getRandNum = random.randint(34,116) #this is 35 above 0 and 35 below 151 so that we don't reach higher
@@ -135,40 +141,66 @@ for shapeSel in getSelPartiShape:
 		        mc.setAttr(makeTearable[0] + ".glueStrength", 0)
 		        mc.setKeyframe(makeTearable, attribute='gls', t=[sortedKeyFrameList[-1]-1])
 				#######################################################################
-				'''
+				
 		        #place the newly created objects into nCloth_Objs folder
-		        #mc.parent(locObj,curveObj,bubbleNClothName,makeTearable, grpFolder)
+		        
 		        inc += 1
-		        mc.parent(locObj,curveObj,bubbleNClothName, grpFolder)
+		        mc.parent(locObj,curveObj,bubbleNClothName,makeTearable, grpFolder)
 		        mc.parent(grpFolder, everyThingFolder)
 		        
 
-		else:
-			print("Check your selection and make sure you have only nParticles selected" + shapeSel)
+	else:
+		print("The item selected doesn't appear to be an nCloth object --> " + shapeSel + " <--")
 
 
 #check to see if the nCloth is enabled and if so turn it off so the next round of bubbles isn't slow
-getnClothEnabledItmes = mc.ls(type='nCloth')
+getnClothEnabledItmes = mc.ls(type='nCloth')#this is a dumb way to grab things
 if len(getnClothEnabledItmes) > 0:
 	for item in getnClothEnabledItmes:
 		print item
 		mc.setAttr(item + ".isDynamic", 1)
-#mc.select("*bubble*")
+		
+		
+		
+		
 
 
+'''
 
+After you cache the bubbles this part will select the
+bubbles and move the cache to the input mesh and 
+then display the input mesh, now ready to be exported.
 
+NOTE -- the key to this working is that the input mesh
+has all the cuts in the edges allowing for a static value
+in the vert count, otherwise this wouldn't work.
 
+'''	
+import maya.mel as mel	
+	
+mc.select('bubble*')
+bubbleToExportSet = mc.sets(n="bubblesToExport")
+getTheBubble = mc.ls(sl=True, tr=True)
+for bubble in getTheBubble:		
+	
+	mc.select(bubble)	
+	mel.eval('moveCacheToInput 0;')
+	mel.eval('displayNClothMesh "input";')
+	print bubble
+	
+	
+	
+		
 
-
-
-
-
-
-
-
-
-
-
-
-
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
