@@ -71,7 +71,7 @@ for shapeSel in getSelPartiShape:
 				for keyFrame in sortedKeyFrameList:
 					pointList.append(allParticleDictionary[curveParticleId][keyFrame])
 				
-				grpFolder = mc.group(em=True, n="groupOfThingsFolder" + str(inc))		
+				grpFolder = mc.group(em=True, n="smBubbleGroup" + str(inc))		
 				
 				curveName = "partiCurve" + str(curveParticleId)
 				curveObj = mc.curve(name = curveName, p = pointList)
@@ -81,13 +81,13 @@ for shapeSel in getSelPartiShape:
 				
 				#For every locator we create, make a bubble and attach that to the locator in worldspace and parent in underneath
 		
-				makeBubble = mc.polyCube(name=("bubble" + str(inc)), w=.1, h=.1, d=.1, sx=5, sy=5, sz=5)
+				makeBubble = mc.polyCube(name=("bubble" + str(inc)), w=.1, h=.1, d=.1, sx=8, sy=8, sz=8)
 		        mc.sculpt(makeBubble, maxDisplacement=.1)
 		        mc.delete(makeBubble, ch=True)
 		        getPos = mc.xform(locObj, ws=True, q=True, translation=True)
 		        mc.xform(makeBubble[0], t=(getPos[0], getPos[1], getPos[2]))
 		        mc.parent(makeBubble[0], locObj)
-		        randBubbleSize = random.uniform(.2, .8)#This is what will give our bubbles the random size
+		        randBubbleSize = random.uniform(.2, .5)#This is what will give our bubbles the random size
 		        mc.scale(randBubbleSize, randBubbleSize, randBubbleSize, makeBubble[0])
 		
 		        #Create nCloth for each bubble and set the collide strength to turn on when the bubble moves, never before.
@@ -105,29 +105,38 @@ for shapeSel in getSelPartiShape:
 		
 		        mc.setAttr(bubbleNClothName + ".inputMeshAttract", .7)
 		        mc.setKeyframe(bubbleNClothName, attribute='inputMeshAttract', t=[sortedKeyFrameList[0], sortedKeyFrameList[-1]+10])
-		        mc.setAttr(bubbleNClothName + ".inputMeshAttract", .4)
+		        mc.setAttr(bubbleNClothName + ".inputMeshAttract", .3)
 		        mc.setKeyframe(bubbleNClothName, attribute='inputMeshAttract', t=[sortedKeyFrameList[0]+10, sortedKeyFrameList[-1]])
 		
 		        mc.setAttr(bubbleNClothName + ".stretchResistance", 20)
 		        mc.setAttr(bubbleNClothName + ".compressionResistance", 80)
 		        mc.setAttr(bubbleNClothName + ".selfCollisionFlag", 4)
 		        mc.setAttr(bubbleNClothName + ".trappedCheck", 1)
-		        mc.setAttr(bubbleNClothName + ".pressure", 1)
+		        mc.setAttr(bubbleNClothName + ".pressure", 3)
 		
-		        mc.setAttr(bubbleNClothName + ".pointMass", .2)
+		        mc.setAttr(bubbleNClothName + ".pointMass", .4)
 		        mc.setAttr(bubbleNClothName + ".isDynamic", 0)
-		
+		        
+		        exprShpName = mc.pickWalk(bubbleNClothName, d="down")
 		        #set the visibiliy of the LOCATORS on when it's moving and off when it has stopped
 		        setOn = mc.setKeyframe( locObj[0], attribute='visibility', t=[sortedKeyFrameList[0], sortedKeyFrameList[-1]])
 		        mc.setAttr(locObj[0] + ".visibility", 0)
 		        setOff = mc.setKeyframe( locObj[0], attribute='visibility', t=[sortedKeyFrameList[0]-1, sortedKeyFrameList[-1]+1])
 		        
-		        ######################################################################
+		        #########EXPRESSION TIME################ All examples below are not currently working but different techniques I tried to solve the problem so far
+		        #This needs to occur because the computer can't handle this many nCloth items being alive at the same time.
+		        #theExpression = mc.expression(name = "bubbleExp", string = "if(frame <= " + str(sortedKeyFrameList[0]) + ")" + '\n' + "    setAttr " + '"' +  exprShpName[0] + ".isDynamic" + '" ' + str(0) + ";" + '\n' + "if(frame > " + str(sortedKeyFrameList[0]) + ")" + '\n' + "    setAttr " + '"' +  exprShpName[0] + ".isDynamic" +'" ' + str(1) + ";" + '\n' + "if(frame > " + str(sortedKeyFrameList[-1]) + ")" + '\n' + "    setAttr " + '"' +  exprShpName[0] + ".isDynamic" + '" ' + str(0) + ";")
+		        #theExpression = mc.expression(name = "bubbleExp", string = "if(frame <= " + str(sortedKeyFrameList[0]) + ")" + '\n' + "    setAttr " + '"' +  exprShpName[0] + ".isDynamic" + '" ' + str(0) + ";" + '\n' + "else if(frame > " + str(sortedKeyFrameList[0]) + " && " + "frame < " + str(sortedKeyFrameList[-1]) + ")" + '\n' + "    setAttr " + '"' +  exprShpName[0] + ".isDynamic" +'" ' + str(1) + ";" + '\n' + "else" + '\n' + "    setAttr " + '"' +  exprShpName[0] + ".isDynamic" + '" ' + str(0) + ";")
+		        #theExpression = mc.expression(name = "bubbleExp", string = "if(frame <= " + str(sortedKeyFrameList[0]) + ")" + '\n' + "    setAttr " + '"' +  exprShpName[0] + ".isDynamic" + '" ' + str(0) + ";" + '\n' + "if(frame > " + str(sortedKeyFrameList[0]) + "&&" + "frame < " + str(sortedKeyFrameList[-1]) + ")" + '\n' + "    setAttr " + '"' +  exprShpName[0] + ".isDynamic" +'" ' + str(1) +  ";")
+		        #theExpression = mc.expression(name = "bubbleExp", string = "if(frame <= " + str(sortedKeyFrameList[0]-5) + " || " "frame > " + str(sortedKeyFrameList[-1]) + ")" + '\n' + "    setAttr " + '"' +  exprShpName[0] + ".isDynamic" + '" ' + str(0) + ";" + '\n' + "else if(frame >= " + str(sortedKeyFrameList[0]-4) + " && " + "frame <= " + str(sortedKeyFrameList[-1]) + ")" + '\n' + "    setAttr " + '"' +  exprShpName[0] + ".isDynamic" +'" ' + str(1) + ";")
+		        #theExpression = mc.expression(name = "bubbleExp", string = "if(frame >= " + str(sortedKeyFrameList[0]-4) + " && " + "frame <= " + str(sortedKeyFrameList[-1]) + ")" + '\n' + "    setAttr " + '"' +  exprShpName[0] + ".isDynamic" + '" ' + str(1) + ";" + '\n' + "else if(frame <= " + str(sortedKeyFrameList[0]-5) + " || " "frame > " + str(sortedKeyFrameList[-1]) + ")" + '\n' + "    setAttr " + '"' +  exprShpName[0] + ".isDynamic" +'" ' + str(0) + ";")
+		        	        		        
+		        ######################### BUBBLE POP TIME #############################################
 		        #pop the bubble - we know there are 152 vers in the bubble. Pick a random number in that and go up and down from that number by 35 to get random selections
-		        getRandNum = random.randint(34,116) #this is 35 above 0 and 35 below 151 so that we don't reach higher
+		        getRandNum = random.randint(34,300) #this is 35 above 0 and 35 below 151 so that we don't reach higher
 		        randVertValHi = getRandNum + 35
 		        randVertValLo = getRandNum - 35
-		        
+		        print getRandNum
 		        mc.select(makeBubble[0] + ".vtx[" + str(randVertValLo) + ":" + str(randVertValHi) + "]")
 		        makeTearable = mel.eval('createNConstraint tearableSurface false;')
 		        
@@ -152,17 +161,24 @@ for shapeSel in getSelPartiShape:
 	else:
 		print("The item selected doesn't appear to be an nCloth object --> " + shapeSel + " <--")
 
-
 #check to see if the nCloth is enabled and if so turn it off so the next round of bubbles isn't slow
 getnClothEnabledItmes = mc.ls(type='nCloth')#this is a dumb way to grab things
 if len(getnClothEnabledItmes) > 0:
 	for item in getnClothEnabledItmes:
 		print item
 		mc.setAttr(item + ".isDynamic", 1)
+mc.currentTime(1)
 		
-		
-		
-		
+
+
+
+'''
+mc.select("nClothBub*")
+
+
+
+
+'''		
 
 
 '''
@@ -175,12 +191,12 @@ NOTE -- the key to this working is that the input mesh
 has all the cuts in the edges allowing for a static value
 in the vert count, otherwise this wouldn't work.
 
-'''	
+
 import maya.mel as mel	
 	
-mc.select('bubble*')
-bubbleToExportSet = mc.sets(n="bubblesToExport")
+mc.select('bubble*')#If there are other objects in the scene that start with bubble you may be selecting it, be careful
 getTheBubble = mc.ls(sl=True, tr=True)
+bubbleToExportSet = mc.sets(getTheBubble ,n="bubblesToExport")
 for bubble in getTheBubble:		
 	
 	mc.select(bubble)	
@@ -188,6 +204,13 @@ for bubble in getTheBubble:
 	mel.eval('displayNClothMesh "input";')
 	print bubble
 	
+	
+
+mc.select("locatorName*")
+#To delete the expressions if they're turned back on again
+mc.select("bubbleExp*")
+mc.delete()
+'''		
 	
 	
 		
