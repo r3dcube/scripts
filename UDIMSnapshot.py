@@ -1,9 +1,8 @@
 import maya.cmds as mc
 from functools import partial
 import math
-#uMin = 0
+
 uMax = 1
-#vMin = 0
 vMax = 1
 outputDir = ''
 imageFormat = ''
@@ -12,9 +11,8 @@ maxUval = 0
 maxVval = 0
 
 def exportUDIM():
-	#global uMin
-	global uMax
-	#global vMin
+	
+	global uMax	
 	global vMax
 	global amount
 	global outputDir
@@ -73,7 +71,7 @@ def exportUDIM():
 def setOutputDir():
 
 	global outputDir    
-    #User sets the source directory
+    	#User sets the source directory
 	getOutDir = mc.fileDialog2(cap = 'Set The Output Directory', ds = 2, fm = 3, okc = "Set Directory")
 	outputDir = getOutDir[0] + '/'    
 	mc.textScrollList("setDirOutput", e=True, ra=True)	
